@@ -1,0 +1,22 @@
+### Usage
+Basic
+```
+import magnet from 'magnet-core';
+import Server from 'magnet-spdy';
+
+let app = await magnet([Server]);
+// Server running at default port 3000
+```
+server/config/spdy.js
+```
+import fs from 'fs';
+
+export default {
+  key: fs.readFileSync(__dirname + '/keys/localhost.key', 'utf-8'),
+  cert: fs.readFileSync(__dirname + '/keys/localhost.crt', 'utf-8')
+};
+```
+Config please refer [node-spdy](https://github.com/indutny/node-spdy)
+
+### TODO
+- Add letsencrypt
