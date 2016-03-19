@@ -1,3 +1,6 @@
+magnet-spdy
+===========
+
 [![Build Status](https://travis-ci.org/Magnetjs/magnet-spdy.svg?branch=master)](https://travis-ci.org/Magnetjs/magnet-spdy)
 
 ### Usage
