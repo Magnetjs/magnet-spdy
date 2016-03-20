@@ -15,5 +15,7 @@ import Server from '../dist';
     t.ok(!!server.app.application);
     t.ok(!!server.app.server);
     t.end();
+
+    server.app.server.close();
   });
 })();
