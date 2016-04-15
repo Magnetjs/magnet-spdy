@@ -21,38 +21,39 @@ export default class SPDY extends Base {
 
     this.serverConfig = merge(defaultConfig, this.config.server, this.config.spdy);
 
-    let LEX;
+    if (this.serverConfig.letsEncrypt.enable) {
+      let LEX;
 
-    if (this.serverConfig.testing) {
-      LEX = le.testing();
-    } else {
-      LEX = le;
-    }
-
-    let lex = LEX.create({
-      configDir: this.serverConfig.letsEncrypt.configDir,
-      approveRegistration: (hostname, cb) => { // leave `null` to disable automatic registration
-        // Note: this is the place to check your database to get the user associated with this domain
-        cb(null, {
-          domains: [hostname],
-          email: this.serverConfig.letsEncrypt.email,
-          agreeTos: true
-        });
+      if (this.serverConfig.letsEncrypt.testing) {
+        LEX = le.testing();
+      } else {
+        LEX = le;
       }
-    });
 
-    if (this.serverConfig.enforceHttps.enable) {
-      this.app.application.use(convert(enforceHttps(this.serverConfig.enforceHttps.options)));
+      let lex = LEX.create({
+        configDir: this.serverConfig.letsEncrypt.configDir,
+        approveRegistration: (hostname, cb) => { // leave `null` to disable automatic registration
+          // Note: this is the place to check your database to get the user associated with this domain
+          cb(null, {
+            domains: [hostname],
+            email: this.serverConfig.letsEncrypt.email,
+            agreeTos: true
+          });
+        }
+      });
+
+      if (this.serverConfig.enforceHttps.enable) {
+        this.app.application.use(convert(enforceHttps(this.serverConfig.enforceHttps.options)));
+      }
+
+      /**
+      * Create server
+      */
+      this.app.server = https.createServer(Object.assign(lex.httpsOptions, this.serverConfig), LEX.createAcmeResponder(lex, this.app.application.callback()));
+      this.redirectServer = http.createServer(LEX.createAcmeResponder(lex, this.app.application.callback()));
+    } else {
+      this.app.server = https.createServer(this.serverConfig, this.app.application.callback());
     }
-
-    /**
-     * Create server
-     */
-    this.app.server = https.createServer(Object.assign(lex.httpsOptions, this.serverConfig), LEX.createAcmeResponder(lex, this.app.application.callback()));
-    this.redirectServer = http.createServer(LEX.createAcmeResponder(lex, this.app.application.callback()));
-
-    // this.app.server = https.createServer(this.serverConfig, this.app.application.callback());
-    // var server = https.createServer(lex.httpsOptions, LEX.createAcmeResponder(lex, app.callback()));
   }
 
   /**

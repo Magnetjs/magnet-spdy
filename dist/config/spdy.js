@@ -4,8 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  testing: false,
-
   // https://github.com/turboMaCk/koa-sslify#available-options
   enforceHttps: {
     enable: true,
@@ -13,6 +11,8 @@ exports.default = {
   },
 
   letsEncrypt: {
+    enable: true,
+    testing: false,
     email: 'user@example.com',
     configDir: './letsencrypt.config'
   },

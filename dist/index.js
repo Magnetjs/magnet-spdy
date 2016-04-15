@@ -69,7 +69,8 @@ var SPDY = function (_Base) {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
         var _this2 = this;
 
-        var LEX, lex;
+        var _LEX, lex;
+
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -83,43 +84,44 @@ var SPDY = function (_Base) {
 
                 this.serverConfig = (0, _merge2.default)(_spdy4.default, this.config.server, this.config.spdy);
 
-                LEX = void 0;
+                if (this.serverConfig.letsEncrypt.enable) {
+                  _LEX = void 0;
 
 
-                if (this.serverConfig.testing) {
-                  LEX = _letsencryptExpress2.default.testing();
-                } else {
-                  LEX = _letsencryptExpress2.default;
-                }
-
-                lex = LEX.create({
-                  configDir: this.serverConfig.letsEncrypt.configDir,
-                  approveRegistration: function approveRegistration(hostname, cb) {
-                    // leave `null` to disable automatic registration
-                    // Note: this is the place to check your database to get the user associated with this domain
-                    cb(null, {
-                      domains: [hostname],
-                      email: _this2.serverConfig.letsEncrypt.email,
-                      agreeTos: true
-                    });
+                  if (this.serverConfig.letsEncrypt.testing) {
+                    _LEX = _letsencryptExpress2.default.testing();
+                  } else {
+                    _LEX = _letsencryptExpress2.default;
                   }
-                });
+
+                  lex = _LEX.create({
+                    configDir: this.serverConfig.letsEncrypt.configDir,
+                    approveRegistration: function approveRegistration(hostname, cb) {
+                      // leave `null` to disable automatic registration
+                      // Note: this is the place to check your database to get the user associated with this domain
+                      cb(null, {
+                        domains: [hostname],
+                        email: _this2.serverConfig.letsEncrypt.email,
+                        agreeTos: true
+                      });
+                    }
+                  });
 
 
-                if (this.serverConfig.enforceHttps.enable) {
-                  this.app.application.use((0, _koaConvert2.default)((0, _koaSslify2.default)(this.serverConfig.enforceHttps.options)));
+                  if (this.serverConfig.enforceHttps.enable) {
+                    this.app.application.use((0, _koaConvert2.default)((0, _koaSslify2.default)(this.serverConfig.enforceHttps.options)));
+                  }
+
+                  /**
+                  * Create server
+                  */
+                  this.app.server = _spdy2.default.createServer(Object.assign(lex.httpsOptions, this.serverConfig), _LEX.createAcmeResponder(lex, this.app.application.callback()));
+                  this.redirectServer = _http2.default.createServer(_LEX.createAcmeResponder(lex, this.app.application.callback()));
+                } else {
+                  this.app.server = _spdy2.default.createServer(this.serverConfig, this.app.application.callback());
                 }
 
-                /**
-                 * Create server
-                 */
-                this.app.server = _spdy2.default.createServer(Object.assign(lex.httpsOptions, this.serverConfig), LEX.createAcmeResponder(lex, this.app.application.callback()));
-                this.redirectServer = _http2.default.createServer(LEX.createAcmeResponder(lex, this.app.application.callback()));
-
-                // this.app.server = https.createServer(this.serverConfig, this.app.application.callback());
-                // var server = https.createServer(lex.httpsOptions, LEX.createAcmeResponder(lex, app.callback()));
-
-              case 9:
+              case 4:
               case 'end':
                 return _context.stop();
             }
