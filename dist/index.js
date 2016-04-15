@@ -10,10 +10,6 @@ var _base = require('magnet-core/dist/base');
 
 var _base2 = _interopRequireDefault(_base);
 
-var _koa = require('koa');
-
-var _koa2 = _interopRequireDefault(_koa);
-
 var _spdy = require('spdy');
 
 var _spdy2 = _interopRequireDefault(_spdy);
@@ -75,13 +71,6 @@ var SPDY = function (_Base) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                // Setup Koa
-                // TODO: Maybe move to own module?
-                this.app.application = new _koa2.default();
-                this.app.application.on('error', function (err) {
-                  _this2.log.error(err);
-                });
-
                 this.serverConfig = (0, _merge2.default)(_spdy4.default, this.config.server, this.config.spdy);
 
                 if (this.serverConfig.letsEncrypt.enable) {
@@ -116,12 +105,14 @@ var SPDY = function (_Base) {
                   * Create server
                   */
                   this.app.server = _spdy2.default.createServer(Object.assign(lex.httpsOptions, this.serverConfig), _LEX.createAcmeResponder(lex, this.app.application.callback()));
-                  this.redirectServer = _http2.default.createServer(_LEX.createAcmeResponder(lex, this.app.application.callback()));
+                  if (this.serverConfig.redirectServer.enable) {
+                    this.app.redirectServer = _http2.default.createServer(_LEX.createAcmeResponder(lex, this.app.application.callback()));
+                  }
                 } else {
-                  this.app.server = _spdy2.default.createServer(this.serverConfig, this.app.application.callback());
+                  this.app.server = _spdy2.default.createServer(this.serverConfig.ssl, this.app.application.callback());
                 }
 
-              case 4:
+              case 2:
               case 'end':
                 return _context.stop();
             }
@@ -144,14 +135,22 @@ var SPDY = function (_Base) {
     key: 'start',
     value: function () {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
+        var ctx;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                this.app.runnable = this.app.server.listen(this.serverConfig.port);
-                this.app.redirectServer = this.app.server.listen(8080);
+                ctx = this;
 
-                this.log.info('Server started at port ' + this.serverConfig.port);
+                this.app.runnable = this.app.server.listen(this.serverConfig.port, function () {
+                  ctx.log.info('Server started at port ' + this.address().port);
+                });
+
+                if (this.serverConfig.redirectServer.enable) {
+                  this.app.runnableRedirectServer = this.app.redirectServer.listen(this.serverConfig.redirectServerPort, function () {
+                    ctx.log.info('Redirecting insecure traffic from ' + this.address().port + ' to https');
+                  });
+                }
 
               case 3:
               case 'end':

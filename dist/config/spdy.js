@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
+  port: 3000,
+
   // https://github.com/turboMaCk/koa-sslify#available-options
   enforceHttps: {
     enable: true,
@@ -17,5 +19,19 @@ exports.default = {
     configDir: './letsencrypt.config'
   },
 
-  port: 3000
+  redirectServer: {
+    enable: true,
+    port: 8080
+  }
 };
+
+// // Without letsencrypt
+// import fs from 'fs';
+// export default {
+//   port: 1337,
+//
+//   ssl: {
+//     key: fs.readFileSync(__dirname + '/keys/localhost.key', 'utf-8'),
+//     cert: fs.readFileSync(__dirname + '/keys/localhost.crt', 'utf-8')
+//   }
+// };

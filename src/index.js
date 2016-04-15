@@ -1,5 +1,4 @@
 import Base from 'magnet-core/dist/base';
-import Koa from 'koa';
 import https from 'spdy';
 import http from 'http';
 import convert from 'koa-convert';
@@ -12,13 +11,6 @@ let LEX = le.testing();
 
 export default class SPDY extends Base {
   async setup() {
-    // Setup Koa
-    // TODO: Maybe move to own module?
-    this.app.application = new Koa();
-    this.app.application.on('error', (err) => {
-      this.log.error(err);
-    });
-
     this.serverConfig = merge(defaultConfig, this.config.server, this.config.spdy);
 
     if (this.serverConfig.letsEncrypt.enable) {
@@ -50,9 +42,11 @@ export default class SPDY extends Base {
       * Create server
       */
       this.app.server = https.createServer(Object.assign(lex.httpsOptions, this.serverConfig), LEX.createAcmeResponder(lex, this.app.application.callback()));
-      this.redirectServer = http.createServer(LEX.createAcmeResponder(lex, this.app.application.callback()));
+      if (this.serverConfig.redirectServer.enable) {
+        this.app.redirectServer = http.createServer(LEX.createAcmeResponder(lex, this.app.application.callback()));
+      }
     } else {
-      this.app.server = https.createServer(this.serverConfig, this.app.application.callback());
+      this.app.server = https.createServer(this.serverConfig.ssl, this.app.application.callback());
     }
   }
 
@@ -60,9 +54,15 @@ export default class SPDY extends Base {
    * Start SPDY server
    */
   async start() {
-    this.app.runnable = this.app.server.listen(this.serverConfig.port);
-    this.app.redirectServer = this.app.server.listen(8080);
+    let ctx = this;
+    this.app.runnable = this.app.server.listen(this.serverConfig.port, function() {
+      ctx.log.info(`Server started at port ${this.address().port}`);
+    });
 
-    this.log.info(`Server started at port ${this.serverConfig.port}`);
+    if (this.serverConfig.redirectServer.enable) {
+      this.app.runnableRedirectServer = this.app.redirectServer.listen(this.serverConfig.redirectServerPort, function() {
+        ctx.log.info(`Redirecting insecure traffic from ${this.address().port} to https`);
+      });
+    }
   }
 }
