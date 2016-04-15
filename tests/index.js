@@ -12,7 +12,6 @@ import Server from '../dist';
   await server.start();
 
   test('Start server', function (t) {
-    t.ok(!!server.app.application);
     t.ok(!!server.app.server);
     t.end();
 
