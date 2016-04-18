@@ -18,6 +18,10 @@ var _http = require('http');
 
 var _http2 = _interopRequireDefault(_http);
 
+var _koa = require('koa');
+
+var _koa2 = _interopRequireDefault(_koa);
+
 var _koaConvert = require('koa-convert');
 
 var _koaConvert2 = _interopRequireDefault(_koaConvert);
@@ -65,7 +69,7 @@ var SPDY = function (_Base) {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
         var _this2 = this;
 
-        var _LEX, lex;
+        var _LEX, lex, koa, redirectHttps;
 
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
@@ -96,17 +100,20 @@ var SPDY = function (_Base) {
                     }
                   });
 
-
-                  if (this.serverConfig.enforceHttps.enable) {
-                    this.app.application.use((0, _koaConvert2.default)((0, _koaSslify2.default)(this.serverConfig.enforceHttps.options)));
-                  }
-
                   /**
                   * Create server
                   */
-                  this.app.server = _spdy2.default.createServer(Object.assign(lex.httpsOptions, this.serverConfig), _LEX.createAcmeResponder(lex, this.app.application.callback()));
+
+                  this.app.server = _spdy2.default.createServer(lex.httpsOptions, _LEX.createAcmeResponder(lex, this.app.application.callback()));
+                  // this.app.server = https.createServer(Object.assign(lex.httpsOptions, this.serverConfig), LEX.createAcmeResponder(lex, this.app.application.callback()));
                   if (this.serverConfig.redirectServer.enable) {
-                    this.app.redirectServer = _http2.default.createServer(_LEX.createAcmeResponder(lex, this.app.application.callback()));
+                    koa = new _koa2.default();
+                    redirectHttps = void 0;
+
+                    if (this.serverConfig.enforceHttps.options) {
+                      redirectHttps = koa.use((0, _koaConvert2.default)((0, _koaSslify2.default)(this.serverConfig.enforceHttps.options)));
+                    }
+                    this.app.redirectServer = _http2.default.createServer(_LEX.createAcmeResponder(lex, redirectHttps.callback()));
                   }
                 } else {
                   this.app.server = _spdy2.default.createServer(this.serverConfig.ssl, this.app.application.callback());
@@ -147,7 +154,7 @@ var SPDY = function (_Base) {
                 });
 
                 if (this.serverConfig.redirectServer.enable) {
-                  this.app.runnableRedirectServer = this.app.redirectServer.listen(this.serverConfig.redirectServerPort, function () {
+                  this.app.runnableRedirectServer = this.app.redirectServer.listen(this.serverConfig.redirectServer.port, function () {
                     ctx.log.info('Redirecting insecure traffic from ' + this.address().port + ' to https');
                   });
                 }
@@ -172,3 +179,4 @@ var SPDY = function (_Base) {
 }(_base2.default);
 
 exports.default = SPDY;
+//# sourceMappingURL=index.js.map

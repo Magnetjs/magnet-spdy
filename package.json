@@ -1,6 +1,6 @@
 {
   "name": "magnet-spdy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Readme",
   "main": "dist/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "babel src --out-dir dist",
     "start": "babel src --out-dir dist",
     "test": "babel-node tests/index.js | tap-spec",
-    "watch": "nodemon --ignore dist --exec \"babel src\" --out-dir dist",
+    "watch": "nodemon --ignore dist --exec \"babel src --out-dir dist --source-maps\"",
     "watch-test": "nodemon --delay 0.5 --ignore src --exec babel-node tests/index.js | tap-spec",
     "watch-all": "concurrently \"npm run watch\" \"npm run watch-test\""
   },
@@ -24,6 +24,7 @@
     "dist"
   ],
   "dependencies": {
+    "koa": "^2.0.0",
     "koa-convert": "^1.2.0",
     "koa-sslify": "^1.0.1",
     "letsencrypt-express": "^1.1.3",

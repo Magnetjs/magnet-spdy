@@ -1,6 +1,7 @@
 import Base from 'magnet-core/dist/base';
 import https from 'spdy';
 import http from 'http';
+import Koa from 'koa';
 import convert from 'koa-convert';
 import enforceHttps from 'koa-sslify';
 import le from 'letsencrypt-express';
@@ -34,19 +35,24 @@ export default class SPDY extends Base {
         }
       });
 
-      if (this.serverConfig.enforceHttps.enable) {
-        this.app.application.use(convert(enforceHttps(this.serverConfig.enforceHttps.options)));
-      }
-
       /**
       * Create server
       */
-      this.app.server = https.createServer(Object.assign(lex.httpsOptions, this.serverConfig), LEX.createAcmeResponder(lex, this.app.application.callback()));
+      this.app.server = https.createServer(lex.httpsOptions, LEX.createAcmeResponder(lex, this.app.application.callback()));
       if (this.serverConfig.redirectServer.enable) {
-        this.app.redirectServer = http.createServer(LEX.createAcmeResponder(lex, this.app.application.callback()));
+        let koa = new Koa();
+        let redirectHttps;
+        if (this.serverConfig.enforceHttps.options) {
+          redirectHttps = koa.use(
+            convert(
+              enforceHttps(this.serverConfig.enforceHttps.options)
+            )
+          );
+        }
+        this.app.redirectServer = http.createServer(LEX.createAcmeResponder(lex, redirectHttps.callback()));
       }
     } else {
-      this.app.server = https.createServer(this.serverConfig.ssl, this.app.application.callback());
+      this.app.server = https.createServer(this.serverConfig, this.app.application.callback());
     }
   }
 
@@ -60,7 +66,7 @@ export default class SPDY extends Base {
     });
 
     if (this.serverConfig.redirectServer.enable) {
-      this.app.runnableRedirectServer = this.app.redirectServer.listen(this.serverConfig.redirectServerPort, function() {
+      this.app.runnableRedirectServer = this.app.redirectServer.listen(this.serverConfig.redirectServer.port, function() {
         ctx.log.info(`Redirecting insecure traffic from ${this.address().port} to https`);
       });
     }
