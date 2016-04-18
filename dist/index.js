@@ -14,22 +14,6 @@ var _spdy = require('spdy');
 
 var _spdy2 = _interopRequireDefault(_spdy);
 
-var _http = require('http');
-
-var _http2 = _interopRequireDefault(_http);
-
-var _koa = require('koa');
-
-var _koa2 = _interopRequireDefault(_koa);
-
-var _koaConvert = require('koa-convert');
-
-var _koaConvert2 = _interopRequireDefault(_koaConvert);
-
-var _koaSslify = require('koa-sslify');
-
-var _koaSslify2 = _interopRequireDefault(_koaSslify);
-
 var _letsencryptExpress = require('letsencrypt-express');
 
 var _letsencryptExpress2 = _interopRequireDefault(_letsencryptExpress);
@@ -52,8 +36,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var LEX = _letsencryptExpress2.default.testing();
-
 var SPDY = function (_Base) {
   _inherits(SPDY, _Base);
 
@@ -69,25 +51,27 @@ var SPDY = function (_Base) {
       var ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
         var _this2 = this;
 
-        var _LEX, lex, koa, redirectHttps;
-
+        var httpsOptions, responder, LEX, lex;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                httpsOptions = void 0;
+                responder = void 0;
+
                 this.serverConfig = (0, _merge2.default)(_spdy4.default, this.config.server, this.config.spdy);
 
                 if (this.serverConfig.letsEncrypt.enable) {
-                  _LEX = void 0;
+                  LEX = void 0;
 
 
                   if (this.serverConfig.letsEncrypt.testing) {
-                    _LEX = _letsencryptExpress2.default.testing();
+                    LEX = _letsencryptExpress2.default.testing();
                   } else {
-                    _LEX = _letsencryptExpress2.default;
+                    LEX = _letsencryptExpress2.default;
                   }
 
-                  lex = _LEX.create({
+                  lex = LEX.create({
                     configDir: this.serverConfig.letsEncrypt.configDir,
                     approveRegistration: function approveRegistration(hostname, cb) {
                       // leave `null` to disable automatic registration
@@ -100,26 +84,20 @@ var SPDY = function (_Base) {
                     }
                   });
 
-                  /**
-                  * Create server
-                  */
 
-                  this.app.server = _spdy2.default.createServer(lex.httpsOptions, _LEX.createAcmeResponder(lex, this.app.application.callback()));
-                  // this.app.server = https.createServer(Object.assign(lex.httpsOptions, this.serverConfig), LEX.createAcmeResponder(lex, this.app.application.callback()));
-                  if (this.serverConfig.redirectServer.enable) {
-                    koa = new _koa2.default();
-                    redirectHttps = void 0;
-
-                    if (this.serverConfig.enforceHttps.options) {
-                      redirectHttps = koa.use((0, _koaConvert2.default)((0, _koaSslify2.default)(this.serverConfig.enforceHttps.options)));
-                    }
-                    this.app.redirectServer = _http2.default.createServer(_LEX.createAcmeResponder(lex, redirectHttps.callback()));
-                  }
+                  httpsOptions = lex.httpsOptions;
+                  responder = LEX.createAcmeResponder(lex, this.app.application.callback());
                 } else {
-                  this.app.server = _spdy2.default.createServer(this.serverConfig.ssl, this.app.application.callback());
+                  httpsOptions = this.serverConfig;
+                  responder = this.app.application.callback();
                 }
 
-              case 2:
+                /**
+                * Create server
+                */
+                this.app.server = _spdy2.default.createServer(httpsOptions, responder);
+
+              case 5:
               case 'end':
                 return _context.stop();
             }
@@ -153,13 +131,7 @@ var SPDY = function (_Base) {
                   ctx.log.info('Server started at port ' + this.address().port);
                 });
 
-                if (this.serverConfig.redirectServer.enable) {
-                  this.app.runnableRedirectServer = this.app.redirectServer.listen(this.serverConfig.redirectServer.port, function () {
-                    ctx.log.info('Redirecting insecure traffic from ' + this.address().port + ' to https');
-                  });
-                }
-
-              case 3:
+              case 2:
               case 'end':
                 return _context2.stop();
             }

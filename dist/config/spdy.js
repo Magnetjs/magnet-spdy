@@ -6,22 +6,11 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
   port: 3000,
 
-  // https://github.com/turboMaCk/koa-sslify#available-options
-  enforceHttps: {
-    enable: true,
-    options: {}
-  },
-
   letsEncrypt: {
     enable: true,
     testing: false,
     email: 'user@example.com',
     configDir: './letsencrypt.config'
-  },
-
-  redirectServer: {
-    enable: true,
-    port: 8080
   }
 };
 
