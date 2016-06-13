@@ -127,7 +127,7 @@ var SPDY = function (_Base) {
               case 0:
                 ctx = this;
 
-                this.app.runnable = this.app.server.listen(this.serverConfig.port, function () {
+                this.app.server = this.app.server.listen(this.serverConfig.port, function () {
                   ctx.log.info('Server started at port ' + this.address().port);
                 });
 
@@ -151,4 +151,3 @@ var SPDY = function (_Base) {
 }(_base2.default);
 
 exports.default = SPDY;
-//# sourceMappingURL=index.js.map

@@ -49,7 +49,7 @@ export default class SPDY extends Base {
    */
   async start() {
     let ctx = this;
-    this.app.runnable = this.app.server.listen(this.serverConfig.port, function() {
+    this.app.server = this.app.server.listen(this.serverConfig.port, function() {
       ctx.log.info(`Server started at port ${this.address().port}`);
     });
   }
