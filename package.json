@@ -24,7 +24,7 @@
     "dist"
   ],
   "dependencies": {
-    "letsencrypt-express": "^1.1.5",
+    "letsencrypt-express": "^2.0.3",
     "lodash": "^4.11.1",
     "magnet-core": "^1.1.0",
     "spdy": "^3.3.1"
