@@ -27,7 +27,7 @@
     "letsencrypt-express": "^1.1.5",
     "lodash": "^4.11.1",
     "magnet-core": "^1.1.0",
-    "spdy": "^3.3.1"
+    "spdy": "^3.4.4"
   },
   "devDependencies": {
     "babel-cli": "^6.7.7",
