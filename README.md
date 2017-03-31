@@ -1,6 +1,8 @@
 magnet-spdy
 ===========
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Magnetjs/magnet-spdy.svg)](https://greenkeeper.io/)
+
 [![Build Status](https://travis-ci.org/Magnetjs/magnet-spdy.svg?branch=master)](https://travis-ci.org/Magnetjs/magnet-spdy)
 
 ### Usage
