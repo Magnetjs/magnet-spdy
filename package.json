@@ -4,13 +4,14 @@
   "description": "Readme",
   "main": "dist/index.js",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepublish": "npm run snyk-protect && npm run build",
     "build": "babel src --out-dir dist",
     "start": "babel src --out-dir dist",
     "test": "babel-node tests/index.js | tap-spec",
     "watch": "nodemon --ignore dist --exec \"babel src --out-dir dist --source-maps\"",
     "watch-test": "nodemon --delay 0.5 --ignore src --exec babel-node tests/index.js | tap-spec",
-    "watch-all": "concurrently \"npm run watch\" \"npm run watch-test\""
+    "watch-all": "concurrently \"npm run watch\" \"npm run watch-test\"",
+    "snyk-protect": "snyk protect"
   },
   "keywords": [
     "magnet",
@@ -27,7 +28,8 @@
     "letsencrypt-express": "^1.1.5",
     "lodash": "^4.11.1",
     "magnet-core": "^1.1.0",
-    "spdy": "^3.3.1"
+    "spdy": "^3.3.1",
+    "snyk": "^1.316.1"
   },
   "devDependencies": {
     "babel-cli": "^6.7.7",
@@ -115,5 +117,6 @@
       "socket": true,
       "webpackIsomorphicTools": true
     }
-  }
+  },
+  "snyk": true
 }
